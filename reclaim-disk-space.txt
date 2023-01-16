@@ -1,0 +1,41 @@
+#! /bin/bash
+
+function checkForHelp() {
+if [ $# -gt 1 ]
+then
+        echo More than one argument, please use only one argument!
+        echo ------
+        exit
+else
+        if [ $# -eq 0 ] || [ "$1" == "-h" ]
+        then
+                echo "Remove exited containers (-c)
+Remove unused images (-i)
+Remove unused volumes (-v)
+Remove all above (-all)"
+        fi
+fi
+}
+
+case $1 in
+("" | "-h")
+        checkForHelp;;
+("-c")
+        docker rm $(docker ps -a -f status=exited -f status=created -q)
+        docker stats;;
+("-i")
+        docker docker image prune -a
+        docker stats;;
+("-v")
+        docker volume prune
+        docker stats;;
+("-all")
+        docker rm $(docker ps -a -f status=exited -f status=created -q)
+        docker docker image prune -a
+        docker volume prune
+        docker stats;;
+(*)
+        echo Doing nothing
+        echo -------------
+        exit;;
+esac

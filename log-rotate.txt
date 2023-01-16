@@ -1,0 +1,34 @@
+#! /bin/bash
+
+case $# in
+(0)
+        echo Please enter parameter!
+        exit;;
+(1)
+        find $(grep -v .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p') -mtime -2 -exec zip logs.zip {} \;
+        find $(grep .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p') -mtime -2 -exec zip -r dirs.zip {} \;
+        #zip -rv logs.zip $(grep .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p')
+        mv logs.zip logs-$(date +"%m-%d-%Y-%H:%M:%S.z")
+        mv dirs.zip dirs-$(date +"%m-%d-%Y-%H:%M:%S.z")
+        #zip -rv dirs.zip $(grep -v .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p')
+        #find . -name "logs.zip" -exec gzip --suffix $(date +".%m-%d-%Y-%H:%M:%S.z") {} \;
+        #find . -name "dirs.zip" -exec gzip --suffix $(date +".%m-%d-%Y-%H:%M:%S.z") {} \;
+        #rm -r $(grep -v .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p')
+        #rm $(grep .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p')
+        exit;;
+(2)
+	find $(grep -v .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p') -mtime -2 -exec zip $2/logs.zip {} \;
+	find $(grep .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p') -mtime -2 -exec zip -r $2/dirs.zip {} \;
+        mv $2/logs.zip $2/logs-$(date +"%m-%d-%Y-%H:%M:%S.z")
+        mv $2/dirs.zip $2/dirs-$(date +"%m-%d-%Y-%H:%M:%S.z")
+	#zip -rv logs.zip $(grep .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p') $2
+        #zip -rv dirs.zip $(grep -v .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p') $2
+        #find $2 -name "logs.zip" -exec gzip --suffix $(date +".%m-%d-%Y-%H:%M:%S.z") {} \;
+        #find $2 -name "dir.zip" -exec gzip --suffix $(date +".%m-%d-%Y-%H:%M:%S.z") {} \;
+        #rm $(grep .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p')
+        #rm -r $(grep -v .log$ log-rotate.conf | grep -Ev ^# log-rotate.conf | sed 's|~|'"$HOME"'|p')
+        exit;;
+(*)
+        echo Wrong arguments!
+        exit;;
+esac

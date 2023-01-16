@@ -1,0 +1,80 @@
+#! /bin/bash
+
+chown -R djovanovic:avisto-devops ~/tgengo_lab/artifactory
+chown -R djovanovic:avisto-devops ~/tgengo_lab/nexus
+chown -R djovanovic:avisto-devops ~/tgengo_lab/docker-compose
+
+echo Choose your environment:
+echo 0 - artifactory
+echo 1 - nexus
+echo 2 - docker
+echo Abort operation: "."
+
+read option
+
+case $option in
+ ("" | *[!012.]*)
+        echo "Wrong input"
+        exit;;
+ (.)
+        exit;;
+ (0)
+        echo Please enter name for your repository: \(only letters, numbers, underscore and dash signs\)
+        read name
+        if [[ "$name" == *[!abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_]* ]]
+        then
+                echo Wrong input for a name
+        else
+                option_env="artifactory"
+                mkdir ~/tgengo_lab/artifactory/$name
+                git init ~/tgengo_lab/artifactory/$name
+        fi
+        ;;
+ (1)
+        echo Please enter name for your repository: \(only letters, numbers, underscore and dash signs\)
+        read name
+        if [[ "$name" == *[!abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_]* ]]
+        then
+                echo Wrong input for a name
+        else
+                option_env="nexus"
+                mkdir ~/tgengo_lab/nexus/$name
+                git init ~/tgengo_lab/nexus/$name
+        fi
+        ;;
+ (2)
+        echo Please enter name for your repository: \(only letters, numbers, underscore and dash signs\)
+        read namerep
+        if [[ "$name" == *[!abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_]* ]]
+        then
+                echo Wrong input for a name
+        else
+                option_env="docker-compose"
+                mkdir ~/tgengo_lab/docker-compose/$name
+                git init ~/tgengo_lab/docker-compose/$name
+        fi
+        ;;
+esac
+
+echo Do you want to stay on master branch? Yes - do nothing, No - create new branch \[Y\/N\]
+
+read new_branch
+
+case $new_branch in
+("" | *[!YNyn]*)
+        echo Wrong input!;;
+(N)
+        echo Enter name for a new branch
+        input new_branch_name
+        git checkout -b new_branch_name;;
+esac
+
+find ~/tgengo_lab/$option_env/ -maxdepth 3 -type f ! -name "*.git" -name ".*" | ln -sv ~/tgengo_lab/$option_env/* ~/tgengo_lab/$option_env/$name
+
+echo Workspace successfully created!
+
+echo Disk usage:
+
+df -h
+
+echo Number of processes: $(ps -ef | wc -l)

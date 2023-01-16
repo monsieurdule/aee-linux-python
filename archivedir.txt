@@ -1,0 +1,54 @@
+#! /bin/bash
+echo $1
+
+if [ $# -gt 1 ]
+then
+        echo More than one argument
+        echo ------
+else
+        if [ $# -eq 0 ]
+        then
+                echo No arguments
+        fi
+fi
+
+if [ -d $1 ]
+then
+        echo Directory exists
+else
+        echo Directory doesn\'t exist
+fi
+
+if [ $1 == $(pwd) ]
+then
+        echo This is current directory
+fi
+
+tmp=$(ls -ld ~/djovanovic_lab | head -c 3)
+
+#tmp=$(ls -ld ~/djovanovic_lab | awk '{print $1}')
+
+if [[ $tmp == "drw" ]]
+then
+        echo OK
+fi
+
+folder=$(pwd | awk -F '/' '{print $NF}')
+sizetmp=$(du  ../* -sb | grep $folder)
+size=$(echo $sizetmp | awk -F ' *' '{print $1}')
+
+parentdirtmp=$(pwd)
+parentdir=${parentdirtmp%/*}
+
+if [ $size -gt 10000000 ]
+then
+        echo Folder is larger than 10MB, do you want to continue? Y/N
+        read answer
+        freespace=$(df | grep $parentdir | awk -F ' ' '{print $3}')
+        if [ $freespace -lt $size ]
+        then
+                echo Not enough space on the disk!
+        else
+                echo Enough space
+        fi
+fi
