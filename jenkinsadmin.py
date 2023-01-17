@@ -1,21 +1,28 @@
-from api4jenkins import Jenkins
+import argparse
 import configparser
 import subprocess
-#import sys
-import argparse
 
-parser = argparse.ArgumentParser(description='Use Jenkinsadmin script with arguments')
+from api4jenkins import Jenkins
 
-parser.add_argument('command', metavar='option', type=str, help='Type <stop> top stop the instance\nType <start> to start the instance\nType <backup> to backup the instance\nType <run> to start the job')
-parser.add_argument('--stopbuild', metavar='', type=str, help='Type --stopbuild <any_key> to stop the build')
+parser = argparse.ArgumentParser(description="Use Jenkinsadmin script with arguments")
 
-args = parser.parse_args() 
+parser.add_argument(
+    "command",
+    metavar="option",
+    type=str,
+    help="Type <stop> top stop the instance\nType <start> to start the instance\nType <backup> to backup the instance\nType <run> to start the job",
+)
+parser.add_argument(
+    "--stopbuild",
+    metavar="",
+    type=str,
+    help="Type --stopbuild <any_key> to stop the build",
+)
 
-option = ['stop', 'start', 'backup', 'run', 'runstop']
+args = parser.parse_args()
 
-#if len(sys.argv) == 1:
-#	print('To call the script you need at least one parameter!\n\nType <stop> top stop the instance\nType <start> to start the instance\nType <backup> to backup the instance\nType <run> to start the job')
-#elif len(sys.argv) == 2:
+option = ["stop", "start", "backup", "run", "runstop"]
+
 config_obj = configparser.ConfigParser()
 config_obj.read("configfile.ini")
 
@@ -33,60 +40,67 @@ jenkins_backup_file = JenkinsParameters["filename"]
 
 client = Jenkins(jenkins_url, auth=(jenkins_username, jenkins_password))
 
-#print(client.version)
-
-#option = input('Opcije:\n1 za stop sistema\n2 za start\n3 za backup\n4 start job\n')
 
 def stop():
-	client.system.quiet_down() #sleep jenkins
+    client.system.quiet_down()  # sleep jenkins
+
 
 def start():
-	client.system.cancel_quiet_down() #wake jenkins
+    client.system.cancel_quiet_down()  # wake jenkins
+
 
 def backup():
-	subprocess.run(['rm', f"{jenkins_backup_dir}/{jenkins_backup_file}"]) #remove previous archive file
-	subprocess.run(['docker', 'cp', f'{jenkins_container_name}:{jenkins_workdir}', f'{jenkins_backup_dir}/{jenkins_backup_folder}']) #copy jenkins workdir to backup folder
-	subprocess.run(['tar', '-czvf', f'{jenkins_backup_dir}/{jenkins_backup_file}', f'{jenkins_backup_dir}/{jenkins_backup_folder}']) #tar the backup folder
-	subprocess.run(['rm', '-rf', f'{jenkins_backup_dir}/{jenkins_backup_folder}']) #remove folder, leave only .tar
+    subprocess.run(
+        ["rm", f"{jenkins_backup_dir}/{jenkins_backup_file}"]
+    )  # remove previous archive file
+    subprocess.run(
+        [
+            "docker",
+            "cp",
+            f"{jenkins_container_name}:{jenkins_workdir}",
+            f"{jenkins_backup_dir}/{jenkins_backup_folder}",
+        ]
+    )  # copy jenkins workdir to backup folder
+    subprocess.run(
+        [
+            "tar",
+            "-czvf",
+            f"{jenkins_backup_dir}/{jenkins_backup_file}",
+            f"{jenkins_backup_dir}/{jenkins_backup_folder}",
+        ]
+    )  # tar the backup folder
+    subprocess.run(
+        ["rm", "-rf", f"{jenkins_backup_dir}/{jenkins_backup_folder}"]
+    )  # remove folder, leave only .tar
+
 
 def run():
-	#global job
-	job = client.get_job(jenkins_job_name) #job name is predefined in config file
-	#print(job)
-	#global item
-	item = client.build_job(jenkins_job_name) #build job and save it as "item"
-	#global build
-	build = item.get_build() #save the build as variable so we can use later
-	#print(build)
-	#s = input('Press any key to stop it\n')
+    job = client.get_job(jenkins_job_name)  # job name is predefined in config file
+    item = client.build_job(jenkins_job_name)  # build job and save it as "item"
+    build = item.get_build()  # save the build as variable so we can use later
+
 
 def runstop():
-	#if (args.stopbuild): #if any key is entered job will stop
-		#job = client.get_job(jenkins_job_name)
-	job = client.get_job(jenkins_job_name)
-	last_build = job.get_last_build() #get the last build
-	last_build.stop() #stop it
+    job = client.get_job(jenkins_job_name)
+    last_build = job.get_last_build()  # get the last build
+    last_build.stop()  # stop it
 
 
 if args.command == option[0]:
-	#client.system.quiet_down() #sleep jenkins
-	stop()
+    stop()  # sleep jenkins
 
 if args.command == option[1]:
-	start()
-	#client.system.cancel_quiet_down() #wake jenkins
+    start()  # wake jenkins
 
 if args.command == option[2]:
-	backup()
+    backup()
 
 if args.command == option[3]:
-	run()
+    run()
 
 if args.command == option[4]:
-	#print('Test successful')
-	runstop()
+    runstop()
 
 if args.command not in option:
-	print('Wrong parameter!')
-#elif len(sys.argv) > 2:
-#print('Too many arguments!')
+    print("Wrong parameter!")
+
